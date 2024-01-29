@@ -1,0 +1,35 @@
+let capture;
+let capturewidth = 640;
+let captureheight = 480;
+
+let emotions = ["neutral", "happy", "sad", "angry", "fearful", "disgusted", "surprised"];
+let detections = [];
+
+let audioContext;
+let oscillators = {};
+
+function setup() {
+  createCanvas(capturewidth, captureheight);
+
+  capture = createCapture(VIDEO);
+  capture.position(0, 0);
+  capture.hide();
+
+  const faceOptions = { withLandmarks: true, withExpressions: true, withDescriptors: false };
+
+  faceapi = ml5.faceApi(capture, faceOptions, faceReady);
+
+  // Initialize Web Audio API
+  audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+  // Setup oscillators for each emotion
+  for (let i = 0; i < emotions.length; i++) {
+    let emotion = emotions[i];
+    oscillators[emotion] = createOscillator(getFrequency(emotion));
+  }
+}
+
+function createOscillator(frequency) {
+  let oscillator = audioContext.createOscillator();
+  oscillator.type = 'sine';
+  oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
